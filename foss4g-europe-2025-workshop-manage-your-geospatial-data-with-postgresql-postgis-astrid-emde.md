@@ -1,8 +1,8 @@
 # Workshop Manage your geospatial data with PostgreSQL/PostGIS
 
-[FOSS4G 2025 Workshop Mostar (Bosnia Herzegovina)](https://2025.europe.foss4g.org/)
+[FOSS4G 2025 Workshop Mostar (Bosnia-Herzegovina)](https://2025.europe.foss4g.org/)
 
-![FOSS4G 2025 Workshop Mostar (Bosnia Herzegovina)](img/foss4g-europe-2025.png ) ![](img/postgresql_postgis.png)
+![FOSS4G 2025 Workshop Mostar (Bosnia-Herzegovina)](img/foss4g-europe-2025.png ) ![](img/postgresql_postgis.png)
 
 ![Workshop Program Link](https://talks.osgeo.org/foss4g-europe-2025-workshops/talk/3BURJM/)
 
@@ -44,7 +44,7 @@
 
 ![](img/osgeolive.png )
 
-This Workshop uses the brand new OSGeoLive 17 (https://live.osgeo.org) (Released June 2025). OSGeoLive is based on Lubuntu 24.04 and contains a collection of more than 50 pre-installed software projects. OSGeoLive also contains example data which will be used for the workshop.
+This Workshop uses the brand new OSGeoLive 16 or 17 (https://live.osgeo.org). OSGeoLive is based on Lubuntu 24.04 and contains a collection of more than 50 pre-installed software projects. OSGeoLive also contains example data which will be used for the workshop.
 
 ![](img/osgeolive_menu.png)
 
@@ -58,15 +58,13 @@ You can download OSGeoLive with the following link. You can install OSGeoLive, r
 
 ## Actual Software Versions
 
-* PostgreSQL 16.3 (2025-05-09) https://www.postgresql.org/
-* PostGIS 3.4.2 (2025-02-08) https://postgis.net/
+* PostgreSQL 17.5 (2025-05-08) https://www.postgresql.org/
+* PostGIS 3.5.2 (2025-05-17) https://postgis.net/
 
 
 ### OSGeoLive 17.0
 
-* PostgreSQL 14.9
-* PostGIS 3.3.3
-
+* PostGIS 3.5.2
 
 Who can you find out the version?
 
@@ -195,7 +193,13 @@ SELECT ST_Letters('Good time at FOSS4G Europe 2025');
 ```
 
 ```sql
-SELECT ST_SetSrid(ST_Translate(ST_Scale(ST_Letters('Good time at FOSS4G Europe 2025'), 0.00005, 0.00005), 26.700000 , 58.373440),4326);
+SELECT ST_SetSrid(
+  ST_Translate(
+    ST_Scale(
+      ST_Letters('Good time at FOSS4G Europe 2025')
+    , 0.00005, 0.00005)
+    , 17.787, 43.346)
+  ,4326);
 ```
 
 ![](img/st_letters.png)
@@ -310,7 +314,7 @@ dropdb -U user demo
 
 * create a new table **_cities_** with gid, name, country and geom (see poi example above)
 * create a point for the University (Mostar) with ST_MakePoint
-* We take the coordinate of the building which is latitude 58.373440 longitude 26.716230 
+* We take the coordinate of the expo building which is latitude 43.344108 longitude 17.796749
 
 
 ```sql
@@ -325,7 +329,7 @@ CREATE TABLE cities(
 ```sql
 INSERT INTO cities(
             name, geom, country)
-    VALUES ('Mostar',ST_SetSRID(ST_MakePoint(26.716230 , 58.373440),4326),'Bosnia Herzegovina');
+    VALUES ('Mostar',ST_SetSRID(ST_MakePoint(17.796749 , 43.344108),4326),'Bosnia and Herzegovina');
 ```
 
 ```sql
@@ -369,6 +373,12 @@ INSERT INTO cities(
 INSERT INTO cities(
             name, geom, country)
     VALUES ('Cologne',ST_SetSRID(ST_MakePoint(6.958307 , 50.941357),4326),'Germany');
+```
+
+Have a look at your data
+
+```sql
+SELECT * FROM cities;
 ```
 
 
@@ -432,7 +442,7 @@ To import data you have to follow the steps:
 * You find the natural_earth2 data at /home/user/data/natural_earth2/
 * Import ne_10m_admin_0_countries.shp to table **_ne_10m_admin_0_countries_**
 * Import ne_10m_admin_1_states_provinces_shp.shp to table **_ne_10m_admin_1_states_provinces_shp_**
-* Also import only the provinces from Bosnia Herzegovina to **_table provinces_Bosnia Herzegovina_** (in QGIS use Filter "admin" = 'Bosnia Herzegovina')
+* Also import only the provinces from Bosnia and Herzegovina to **_table provinces_Bosnia Herzegovina_** (in QGIS use Filter "admin" = 'Bosnia and Herzegovina')
 * Import all ne_10m_populated_places to table **_ne_10m_populated_places_**
 * Have a look to your metadata view **_geometry_columns_**
 
@@ -509,11 +519,11 @@ Calculate area using the Spheroid (result in squaremeters)
 SELECT gid, name, st_Area(geom, true) 
   FROM public.ne_10m_admin_0_countries;
 ```
-Calculate area from Germany and Bosnia Herzegovina order by area
+Calculate area from Germany and Bosnia and Herzegovina order by area
 ```sql
 SELECT gid, name, round(ST_Area(geom, true)) as area
   FROM public.ne_10m_admin_0_countries
-  WHERE name IN ('Germany','Bosnia Herzegovina')
+  WHERE name IN ('Germany','Bosnia and Herzegovina')
   ORDER BY area DESC;
 ```
 
@@ -522,7 +532,7 @@ SELECT gid, name, round(ST_Area(geom, true)) as area
 * Create a view with the centroid for each province
 * Try to load the view in QGIS
 * Have a look at your geometry_columns view
-* Check where the centroid of France is and the centroid of Bosnia Herzegovina.
+* Check where the centroid of France is and the centroid of Bosnia and Herzegovina.
 
 
 ```sql
@@ -572,8 +582,6 @@ SELECT g.name, you.name, ST_Distance(g.geom, you.geom, true)
 ```
 
 * Question: Who had the longest distance to travel to Mostar?
-
-![](img/st_distance.png)
 
 
 ## Spatial Index and functional Index
@@ -772,14 +780,14 @@ LANGUAGE 'sql';
 ```sql
 SELECT name, getCountrynameSubdivided(geom) 
  FROM public.ne_10m_populated_places 
- WHERE adm0name = 'Bosnia Herzegovina';
+ WHERE adm0name = 'Bosnia and Herzegovina';
 ```
 
 ```sql
 EXPLAIN ANALYZE
 SELECT name, getCountrynameSubdivided(geom) 
  FROM public.ne_10m_populated_places 
- WHERE adm0name = 'Bosnia Herzegovina';
+ WHERE adm0name = 'Bosnia and Herzegovina';
 ```
 
 ![](img/explain_analyze.png)
@@ -851,17 +859,17 @@ IMPORT FOREIGN SCHEMA public
     INTO public;
 ```
 
-Use KNN (K nearest neighbor) to find the 5 closest pubs/bars from Mostar Department of Geography (see table cities)
+Use KNN (K nearest neighbor) to find the 5 closest pubs/bars from Mostar Expo Building (see table cities)
 
 ```sql  
 CREATE VIEW qry_next_5_bars as   
-SELECT p.osm_id, p.name, p.amenity, p.way as geom 
+SELECT p.osm_id, p.name, p.amenity,  p.geom 
  FROM cities c,
- planet_osm_point p
+ osm_pois_mostar p
   WHERE p.amenity IN ( 'bar' , 'pub')
    AND c.name = 'Mostar'
     ORDER BY
-    c.geom <-> p.way
+    c.geom <-> p.geom
     LIMIT 5;
 ```
 
@@ -869,31 +877,31 @@ SELECT p.osm_id, p.name, p.amenity, p.way as geom
 Select * from qry_next_5_bars
 ```
 
-Use KNN (K nearest neighbor) to find the pubs/bars less then 100 m distance from Mostar Department of Geography (see table cities)
+Use KNN (K nearest neighbor) to find the pubs/bars less then 500 m distance from Mostar Expo Building (see table cities)
 
 
 ```sql
-CREATE VIEW qry_next_bars_100 as
-SELECT p.osm_id, p.name, p.amenity, p.way as geom,
- st_distance(c.geom, p.way, true)
+CREATE VIEW qry_next_bars_500 as
+SELECT p.osm_id, p.name, p.amenity, p.geom,
+ round(st_distance(c.geom, p.geom, true)) as distance 
  FROM cities c,
- planet_osm_point p
+ osm_pois_mostar p
   WHERE p.amenity IN ( 'bar' , 'pub')
    AND c.name = 'Mostar'
-   AND st_distance(c.geom, p.way, true) < 100
+   AND st_distance(c.geom, p.geom, true) < 500
     ORDER BY
-    c.geom <-> p.way;
+    c.geom <-> p.geom;
 ```
 
 ```sql
 Select * from qry_next_bars_100;
 ```
 
-Create the 100 m buffer around the Mostar Department of Geography.
+Create the 500 m buffer around the Mostar FOSS4G Exo building.
 
 ```sql
 CREATE view qry_buffer_100 as
- SELECT gid, st_buffer(geom::geography,100)::geometry as geom
+ SELECT gid, st_buffer(geom::geography,500)::geometry as geom
   FROM cities 
    WHERE name = 'Mostar';
 ```
@@ -903,16 +911,16 @@ Create an intersection between the buffer area and the OSM buildings.
 
 ```sql
 CREATE view qry_intersection_buffer_500_buildings as
-SELECT p.osm_id, p.way as geom, 
+SELECT p.osm_id, p.geom as geom, 
  p.name,
  p.building, 
- ST_Multi(ST_Intersection(p.way, s.geom))::geometry(multipolygon,4326) geom_intersection
+ ST_Multi(ST_Intersection(p.geom, s.geom))::geometry(multipolygon,4326) geom_intersection
  FROM 
- planet_osm_polygon p,
+ osm_building_mostar p,
  qry_buffer_500 s
   WHERE 
   p.building IS NOT NULL AND
-  ST_Intersects(p.way, s.geom);
+  ST_Intersects(p.geom, s.geom);
 ```
 
 ![](img/knn_intersection.png)
@@ -950,18 +958,23 @@ GRANT workshop_writer TO wilma;
 
 GRANT SELECT ON ne_10m_admin_1_states_provinces_shp TO workshop_reader;
 -- change to user robert
+SET ROLE robert;
+-- Run the following SQL
 Select * from ne_10m_admin_1_states_provinces_shp;
 
 -- this command will return an error. Role robert isn't allowed to modify data.
 SELECT * from ne_10m_admin_1_states_provinces_shp;
 UPDATE ne_10m_admin_1_states_provinces_shp SET name = 'TEST' WHERE name = 'Toscana';
-
 --ERROR:  permission denied for relation ne_10m_admin_1_states_provinces_shp
 
+-- change back to role user
+SET ROLE user;
+-- Give access to workshop_writer to table cities
 GRANT ALL ON cities to workshop_writer;
 GRANT USAGE ON SEQUENCE cities_gid_seq TO workshop_writer;
 
--- change to user wilma in pgAdmin
+-- change to user wilma
+SET ROLE wilma;
 -- Run the following SQL
 SELECT * from cities;
 UPDATE cities SET name = 'TEST' WHERE name = 'Mostar';
