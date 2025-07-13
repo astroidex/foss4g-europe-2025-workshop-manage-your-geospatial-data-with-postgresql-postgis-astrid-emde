@@ -1,6 +1,6 @@
 # foss4g-europe-2025-workshop-manage-your-geospatial-data-with-postgresql-postgis-astrid-emde
 
-FOSS4G Europe 2025 Workshop in Mostar Bosnia Herzegovina https://2025.europe.foss4g.org/
+FOSS4G Europe 2025 Workshop in Mostar Bosnia-Herzegovina https://2025.europe.foss4g.org/
 
 Workshop material for PostgreSQL/PostGIS workshop
 
